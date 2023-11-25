@@ -11,29 +11,6 @@ export default function Home() {
   const dispatch = useDispatch();
 
   const user = useSelector((state) => state.user.user);
-  const _id = localStorage.getItem("_id");
-
-  useEffect(() => {
-    const getUserDetails = async () => {
-      try {
-        const response = await axios.post(`${url}/get-user`, {
-          _id,
-        });
-
-        const data = response.data;
-
-        dispatch(addUser(data.user));
-
-        if (data.user?.isInGame) {
-          socket.emit("reconnection", { roomId: data.user.activeGameRoomId });
-          // navigate(`/room/${data.user.activeGameRoomId}`);
-        }
-      } catch (e) {
-        console.log("Error while fetching user details", e.message);
-      }
-    };
-    getUserDetails();
-  }, [dispatch, _id]);
 
   const logout = () => {
     localStorage.removeItem("_id");
@@ -42,12 +19,7 @@ export default function Home() {
   };
 
   const joinChessRoom = (min) => {
-    socket.emit("join_room", {
-      username: user?.username,
-      min: min,
-    });
-
-    navigate(`/waiting`);
+    navigate(`/room/1`);
   };
 
   return (
@@ -62,30 +34,11 @@ export default function Home() {
           justifyContent: "space-around",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Avatar sx={{ bgcolor: "#07C058" }}>
-            {user?.username && user?.username[0]}
-          </Avatar>
-          <h3 style={{ marginLeft: 5 }}> {user?.username}</h3>
-        </div>
-
         <img
           src={"https://www.a23.com/index_assets/images/a23-games-logo.svg"}
           alt=""
           style={{ height: 40, width: 40, margin: 5 }}
         />
-
-        <Button onClick={logout} style={{ fontWeight: "bold" }}>
-          {" "}
-          Logout
-        </Button>
       </div>
 
       <div style={{ padding: 10 }}>

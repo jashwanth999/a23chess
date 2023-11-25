@@ -23,113 +23,46 @@ export const grabPiece = (
   checkMatePopupData,
   setMoveTrack
 ) => {
-  if (myTurn && !checkMatePopupData) {
-    try {
-      let element = e.target;
+  try {
+    let element = e.target;
 
-      const chessboard = chessboardRef.current;
+    const chessboard = chessboardRef.current;
 
-      if (element.classList.contains("piece")) {
-        const grabX = Math.floor(
-          (e.clientX - chessboard.offsetLeft) / (gridConstants.gridSize / 8)
-        );
-        const grabY = Math.abs(
-          Math.floor(
-            (e.clientY - chessboard.offsetTop) / (gridConstants.gridSize / 8)
-          )
-        );
+    if (element.classList.contains("piece")) {
+      const grabX = Math.floor(
+        (e.clientX - chessboard.offsetLeft) / (gridConstants.gridSize / 8)
+      );
+      const grabY = Math.abs(
+        Math.floor(
+          (e.clientY - chessboard.offsetTop) / (gridConstants.gridSize / 8)
+        )
+      );
 
-        let grabpos = grabY.toString() + ":" + grabX.toString();
+      let grabpos = grabY.toString() + ":" + grabX.toString();
 
-        if (
-          users[0]?.username === user?.username &&
-          pieces[grabpos]?.color !== "b"
-        ) {
-          return;
-        } else if (
-          users[1]?.username === user?.username &&
-          piecesOpponent[grabpos]?.color !== "w"
-        ) {
-          return;
-        }
+      setGrabPosition([grabY, grabX]);
 
-        setGrabPosition([grabY, grabX]);
+      const x = e.clientX - gridConstants.gridSize / 8 / 2;
+      const y = e.clientY - gridConstants.gridSize / 8 / 2;
+      element.style.position = "absolute";
+      element.style.left = `${x}px`;
+      element.style.top = `${y}px`;
 
-        setMoveTrack(
-          moveTrackerMap(
-            grabY,
-            grabX,
-            users[0].username === user.username
-              ? pieces[grabpos].pieceName
-              : piecesOpponent[grabpos].pieceName,
-            users[0].username === user.username ? pieces : piecesOpponent
-          )
-        );
-
-        const x = e.clientX - gridConstants.gridSize / 8 / 2;
-        const y = e.clientY - gridConstants.gridSize / 8 / 2;
-        element.style.position = "absolute";
-        element.style.left = `${x}px`;
-        element.style.top = `${y}px`;
-
-        setActivePiece(element);
-      }
-    } catch (e) {
-      console.log("Error while grabbing piece", e.message);
+      setActivePiece(element);
     }
+  } catch (e) {
+    console.log("Error while grabbing piece", e.message);
   }
 };
 
 export const movePiece = (e, chessboardRef, activePiece, setActivePiece) => {
   const chessboard = chessboardRef.current;
   if (activePiece && chessboard) {
-    const minX = chessboard.offsetLeft;
-    const minY = chessboard.offsetTop;
-
-    const maxX = chessboard.offsetLeft + chessboard.clientWidth - 56;
-    const maxY = chessboard.offsetTop + chessboard.clientHeight - 56;
-
-    // console.log(chessboard.offsetLeft, chessboard.clientWidth);
-
     const x = e.clientX - 40;
     const y = e.clientY - 40;
     activePiece.style.position = "absolute";
     activePiece.style.left = `${x}px`;
     activePiece.style.top = `${y}px`;
-
-    // console.log(x, y);
-
-    // If x is smaller than minimum amount
-    //   if (x < minX) {
-    //     activePiece.style.position = "absolute";
-    //     activePiece.style.left = `${minX}px`;
-    //   }
-    //   //If x is bigger than maximum amount
-    //   else if (x > maxX) {
-    //     activePiece.style.position = "absolute";
-    //     activePiece.style.left = `${maxX}px`;
-    //   }
-    //   //If x is in the constraints
-    //   else {
-    //     activePiece.style.position = "absolute";
-    //     activePiece.style.left = `${x}px`;
-    //   }
-
-    //   //If y is smaller than minimum amount
-    //   if (y < minY) {
-    //     activePiece.style.position = "absolute";
-    //     activePiece.style.top = `${minY}px`;
-    //   }
-    //   //If y is bigger than maximum amount
-    //   else if (y > maxY) {
-    //     activePiece.style.position = "absolute";
-    //     activePiece.style.top = `${maxY}px`;
-    //   }
-    //   //If y is in the constraints
-    //   else {
-    //     activePiece.style.position = "absolute";
-    //     activePiece.style.top = `${y}px`;
-    //   }
   }
 };
 export const dropPiece = (
@@ -201,17 +134,15 @@ export const dropPiece = (
           grabPosition[1],
           y,
           x,
-          users[0]?.username === user.username
-            ? pieces[grabpos]?.pieceName
-            : piecesOpponent[grabpos]?.pieceName,
-          users[0]?.username === user.username ? pieces : piecesOpponent
+          pieces[grabpos]?.pieceName,
+          pieces
         ) ||
         allPos.length !== allPosLength
       ) {
         activePiece.style.position = "relative";
         activePiece.style.removeProperty("top");
         activePiece.style.removeProperty("left");
-      } else if (users[0].username === user.username && pieces[grabpos]) {
+      } else if (pieces[grabpos]) {
         let piecesData = pieces[grabpos];
 
         let piecesDataOp = piecesOpponent[grabposOp];
@@ -325,7 +256,7 @@ export const dropPiece = (
                 color: "b",
               });
 
-              checkMateMessageToSocket(roomid, users[0].username, "b");
+              // checkMateMessageToSocket(roomid, users[0].username, "b");
             }
           } else if (
             !checkMateStopFromOTherPiece(
@@ -347,7 +278,7 @@ export const dropPiece = (
               color: "b",
             });
 
-            checkMateMessageToSocket(roomid, users[0].username, "b");
+            // checkMateMessageToSocket(roomid, users[0].username, "b");
           }
         } else setOpponentCalledForCheck(false);
 
@@ -394,23 +325,7 @@ export const dropPiece = (
 
         setAllPos([...allPos, [grabpos, pos, killedPiecesData]]);
 
-        // setAllPosOp([...allPosOp, [grabpos, pos]]);
-
         setAllPosLength(allPosLength + 1);
-
-        messageToSocket(
-          roomid,
-          users,
-          pieces,
-          piecesOpponent,
-          myTurn,
-          killedPiecesData ? [...killedPieces, killedPiecesData] : killedPieces,
-          opponentKilledPieces,
-          time,
-          prevMovePos,
-          [...allPos, [grabpos, pos, killedPiecesData]],
-          [...allPosOp, [grabposOp, posOp, killedPiecesData]]
-        );
       } else if (
         users[1].username === user.username &&
         piecesOpponent[grabpos]
@@ -530,7 +445,7 @@ export const dropPiece = (
                 color: "w",
               });
 
-              checkMateMessageToSocket(roomid, users[1].username, "w");
+              // checkMateMessageToSocket(roomid, users[1].username, "w");
             }
           } else if (
             !checkMateStopFromOTherPiece(
@@ -552,7 +467,7 @@ export const dropPiece = (
               color: "w",
             });
 
-            checkMateMessageToSocket(roomid, users[1].username, "w");
+            // checkMateMessageToSocket(roomid, users[1].username, "w");
           }
         } else setOpponentCalledForCheck(false);
 
@@ -604,31 +519,16 @@ export const dropPiece = (
           pos: posOp,
         };
 
-        // setAllPos([...allPos, [grabpos, pos]]);
-
         setAllPosOp([...allPosOp, [grabpos, pos, killedPiecesOpponentData]]);
 
         setAllPosLength(allPosLength + 1);
-        messageToSocket(
-          roomid,
-          users,
-          pieces,
-          piecesOpponent,
-          myTurn,
-          killedPieces,
-          killedPiecesOpponentData
-            ? [...opponentKilledPieces, killedPiecesOpponentData]
-            : opponentKilledPieces,
-          time,
-          prevMovePos,
-          [...allPos, [grabposOp, posOp, killedPiecesOpponentData]],
-          [...allPosOp, [grabpos, pos, killedPiecesOpponentData]]
-        );
       }
 
       setActivePiece(null);
 
       setMoveTrack();
+
+      setMyTurn(!myTurn);
     }
   } catch (e) {
     console.log("Error while drop piece : ", e.message);

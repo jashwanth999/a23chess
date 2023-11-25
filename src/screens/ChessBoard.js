@@ -67,7 +67,7 @@ export default function ChessBoard() {
 
   const [opponentKilledPieces, setOpponentKilledPieces] = useState([]);
 
-  const [myTurn, setMyTurn] = useState(getTurn(users, user));
+  const [myTurn, setMyTurn] = useState(true);
 
   const [minutes, setMinutes] = useState(10);
 
@@ -110,11 +110,7 @@ export default function ChessBoard() {
       board.push(
         <Box
           key={cord}
-          image={
-            users[0]?.username === user?.username
-              ? pieces[cord]?.image
-              : piecesOpponent[cord]?.image
-          }
+          image={pieces[cord]?.image}
           number={number}
           pos={i.toString() + ":" + j.toString()}
           prevGrabPos={prevMovePos?.grabpos}
@@ -125,292 +121,11 @@ export default function ChessBoard() {
     }
   }
 
-  useEffect(() => {
-    socket.on("recieve_room_data", (data) => {
-      dispatch(changePiecePositionAction(data.pieces));
-      dispatch(changeOpponentPiecePositionAction(data.piecesOpponent));
-
-      setMyTurn(data.turn);
-
-      setKilledPieces(data.killedPieces);
-
-      setOpponentKilledPieces(data.opponentKilledPieces);
-
-      // console.log(data.time)
-
-      setPrevMovePos(data.prevMovePos);
-      
-      setMinutes(data.time.opponentMinutes);
-
-      setSeconds(data.time.opponentSeconds);
-
-      setOpponentMinutes(data.time.minutes);
-
-      setOpponentSeconds(data.time.seconds);
-
-      setAllPos(data.allPos);
-
-      setAllPosOp(data.allPosOp);
-
-      setAllPosLength(data.allPos.length);
-    });
-  }, [dispatch]);
-
-  useEffect(() => {
-    const fetchRoomData = async () => {
-      const roomResponse = await axios.post(`${url}/get-room-data`, {
-        roomId: roomid,
-      });
-
-      if (roomResponse.data.data) {
-        const _id = localStorage.getItem("_id");
-
-        const response = await axios.post(`${url}/get-user`, {
-          _id,
-        });
-
-        const userData = response.data;
-
-        dispatch(addUser(userData.user));
-
-        socket.emit("reconnection", { roomId: roomid });
-
-        const data = roomResponse.data.data;
-
-        dispatch(changePiecePositionAction(data.pieces));
-
-        dispatch(changeOpponentPiecePositionAction(data.piecesOpponent));
-
-        dispatch(addUsers(data.users));
-
-        setMyTurn(data.turn);
-
-        setKilledPieces(data.killedPieces);
-
-        setOpponentKilledPieces(data?.opponentKilledPieces);
-
-        setPrevMovePos(data?.prevMovePos);
-
-        setMinutes(data.time.minutes);
-
-        setSeconds(data.time.seconds);
-
-        setOpponentMinutes(data.time.opponentMinutes);
-
-        setOpponentSeconds(data.time.opponentSeconds);
-
-        setAllPos(data.allPos);
-
-        setAllPosOp(data.allPosOp);
-
-        setPrevMovePos(data.prevMovePos);
-
-        setAllPosLength(data.allPos.length);
-      }
-    };
-
-    fetchRoomData();
-  }, [dispatch, roomid]);
-
-  useEffect(() => {
-    socket.on("recieve_check_mate_data", (data) => {
-      setCheckMatePopUpData(data);
-    });
-  }, [checkMatePopupData]);
-
-  useEffect(() => {
-    const updateUser = async () => {
-      await axios.post(`${url}/update-user`, {
-        _id: _id,
-        isInGame: true,
-        roomId: roomid,
-      });
-    };
-
-    updateUser();
-  }, [_id, roomid]);
-
-  // console.log(kingPosOp);
-
-  // console.log(myTurn);
-
-  // console.log(users);
-
-  useEffect(() => {
-    if (myTurn) {
-      let timer = setInterval(() => {
-        setSeconds(seconds - 1);
-
-        if (seconds === 0) {
-          setSeconds(59);
-          setMinutes(minutes - 1);
-        }
-      }, 1000);
-
-      return () => clearInterval(timer);
-    } else {
-      let opponentTimer = setInterval(() => {
-        setOpponentSeconds(opponentSeconds - 1);
-
-        if (opponentSeconds === 0) {
-          setOpponentSeconds(59);
-          setOpponentMinutes(opponentMinutes - 1);
-        }
-      }, 1000);
-
-      return () => clearInterval(opponentTimer);
-    }
-  });
-
   let time = {
     minutes: minutes,
     seconds: seconds,
     opponentMinutes: opponentMinutes,
     opponentSeconds: opponentSeconds,
-  };
-
-  const totalForward = () => {
-    if (users[0]?.username === user?.username) {
-      let pos, grabpos;
-      for (let i = allPosLength; i < allPos.length; i++) {
-        pos = allPos[i][1];
-
-        grabpos = allPos[i][0];
-
-        pieces[pos] = pieces[grabpos];
-        pieces[grabpos] = "";
-      }
-
-      setPrevMovePos({
-        grabpos: grabpos,
-        pos: pos,
-      });
-
-      setAllPosLength(allPos.length);
-    } else {
-      let pos, grabpos;
-      for (let i = allPosLength; i < allPosOp.length; i++) {
-        pos = allPosOp[i][1];
-
-        grabpos = allPosOp[i][0];
-        piecesOpponent[pos] = piecesOpponent[grabpos];
-
-        piecesOpponent[grabpos] = "";
-      }
-
-      setPrevMovePos({
-        grabpos: grabpos,
-        pos: pos,
-      });
-
-      setAllPosLength(allPosOp.length);
-    }
-  };
-
-  const totalBackWard = () => {
-    if (users[0]?.username === user?.username) {
-      let pos, grabpos;
-      for (let i = allPosLength; i >= 1; i--) {
-        pos = allPos[i - 1][1];
-
-        grabpos = allPos[i - 1][0];
-        pieces[grabpos] = pieces[pos];
-        pieces[pos] =
-          allPos && allPos[i - 1] && allPos[i - 1][2] ? allPos[i - 1][2] : "";
-      }
-
-      setPrevMovePos({
-        grabpos: grabpos,
-        pos: pos,
-      });
-
-      setAllPosLength(0);
-    } else {
-      let pos, grabpos;
-      for (let i = allPosLength; i >= 1; i--) {
-        pos = allPosOp[i - 1][1];
-
-        grabpos = allPosOp[i - 1][0];
-        piecesOpponent[grabpos] = piecesOpponent[pos];
-        piecesOpponent[pos] =
-          allPosOp && allPosOp[i - 1] && allPosOp[i - 1][2]
-            ? allPosOp[i - 1][2]
-            : "";
-      }
-
-      setPrevMovePos({
-        grabpos: grabpos,
-        pos: pos,
-      });
-
-      setAllPosLength(0);
-    }
-  };
-
-  const backWard = () => {
-    if (allPosLength >= 1) {
-      let pos, grabpos;
-      if (users[0]?.username === user?.username) {
-        pos = allPos[allPosLength - 1][1];
-
-        grabpos = allPos[allPosLength - 1][0];
-        pieces[grabpos] = pieces[pos];
-        pieces[pos] =
-          allPos && allPos[allPosLength - 1] && allPos[allPosLength - 1][2]
-            ? allPos[allPosLength - 1][2]
-            : "";
-      } else {
-        pos = allPosOp[allPosLength - 1][1];
-
-        grabpos = allPosOp[allPosLength - 1][0];
-        piecesOpponent[grabpos] = piecesOpponent[pos];
-        piecesOpponent[pos] =
-          allPosOp &&
-          allPosOp[allPosLength - 1] &&
-          allPosOp[allPosLength - 1][2]
-            ? allPosOp[allPosLength - 1][2]
-            : "";
-      }
-
-      setPrevMovePos({
-        grabpos: grabpos,
-        pos: pos,
-      });
-
-      setAllPosLength(allPosLength - 1);
-
-      audioRef.current.play();
-    }
-  };
-
-  const forWard = () => {
-    if (allPosLength < allPos.length || allPosLength < allPosOp.length) {
-      let pos, grabpos;
-
-      if (users[0]?.username === user?.username) {
-        pos = allPos[allPosLength][1];
-
-        grabpos = allPos[allPosLength][0];
-
-        pieces[pos] = pieces[grabpos];
-        pieces[grabpos] = "";
-      } else {
-        pos = allPosOp[allPosLength][1];
-
-        grabpos = allPosOp[allPosLength][0];
-        piecesOpponent[pos] = piecesOpponent[grabpos];
-
-        piecesOpponent[grabpos] = "";
-      }
-
-      setPrevMovePos({
-        grabpos: grabpos,
-        pos: pos,
-      });
-
-      setAllPosLength(allPosLength + 1);
-      audioRef.current.play();
-    }
   };
 
   const exitRoom = async () => {
@@ -429,6 +144,21 @@ export default function ChessBoard() {
 
     window.location.reload();
   };
+
+  const [cards, setCards] = useState([
+    {
+      id: 1,
+      text: "Move one piece three times in a turn, but it cannot capture on the third move",
+    },
+    {
+      id: 2,
+      text: "Place an obstacle on an empty square; pieces cannot move through it for one turn.",
+    },
+    {
+      id: 3,
+      text: "Swap the positions of one of your pieces with one of your opponent's.",
+    },
+  ]);
 
   return (
     <div style={rootDiv}>
@@ -500,7 +230,6 @@ export default function ChessBoard() {
               setActivePiece,
               setMyTurn,
               dispatch,
-
               kingPos,
               kingPosOp,
               myTurn,
@@ -557,27 +286,44 @@ export default function ChessBoard() {
         </div>
 
         <audio src={require("../sounds/piece-move.wav")} ref={audioRef} />
-
-        {checkMatePopupData && (
-          <CheckMatePopUp
-            checkMatePopupData={checkMatePopupData}
-            setCheckMatePopUpData={setCheckMatePopUpData}
-            username={user?.username}
-          />
-        )}
       </div>
-
-      <DetailsComponent
-        roomid={roomid}
-        user={user}
-        socket={socket}
-        allPos={users[0]?.username === user?.username ? allPos : allPosOp}
-        backWard={backWard}
-        forWard={forWard}
-        scrollRef={scrollRef}
-        totalBackWard={totalBackWard}
-        totalForward={totalForward}
-      />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <button
+          onClick={() => {
+            setCards((cards) => cards.slice(0, -1));
+          }}
+          style={{ width: 100 }}
+        >
+          Pick Card
+        </button>
+        <div style={rightDiv}>
+          {cards.map((card, index) => {
+            return (
+              <div
+                key={card.id}
+                style={{
+                  height: 300,
+                  width: 200,
+                  backgroundColor: "white",
+                  borderRadius: 10,
+                  position: "absolute",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <p style={{ textAlign: "center" }}> {card.text} </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -600,6 +346,7 @@ const chessBoardDiv = {
   flexWrap: "wrap",
   gridTemplateColumns: `repeat(8,${gridConstants.gridSize / 8}px)`,
   gridTemplateRows: `repeat(8,${gridConstants.gridSize / 8}px)`,
+  flex: 1,
 };
 
 const topAndBottomDiv = {
@@ -613,8 +360,10 @@ const topAndBottomDiv = {
 
 const rightDiv = {
   margin: 10,
-  flexDirection: "column",
+  display: "flex",
   height: gridConstants.gridSize,
   width: gridConstants.gridSize,
-  justifyContent: "space-around",
+  justifyContent: "center",
+  alignItems: "center",
+  flexDirection: "column",
 };

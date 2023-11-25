@@ -4,6 +4,7 @@ export const pieceValidMethodMap = (prevX, prevY, x, y, pieceName, pieces) => {
   // console.log(prevX, x, prevY, y, pieceName);
 
   if (pieceName === "p") {
+    console.log(validMove.isPawn());
     return validMove.isPawn();
   }
 
@@ -42,29 +43,22 @@ class ValidMove {
 
     // checking if pawn is in starting position pawn can jump 2 steps or else only 1 step
 
+    let prevPos = this.prevX.toString() + ":" + this.prevY.toString();
+
+    let pos = this.x.toString() + ":" + this.y.toString();
+
+    //below condition helps to attack valid pawn attack
+
     if (
-      (this.prevX === 6 && this.prevX - this.x === 2) ||
-      this.prevX - this.x === 1
+      Math.abs(this.prevX - this.x) == 1 &&
+      Math.abs(this.prevY - this.y) == 1
     ) {
-      let prevPos = this.prevX.toString() + ":" + this.prevY.toString();
-
-      let pos = this.x.toString() + ":" + this.y.toString();
-
-      //below condition helps to attack valid pawn attack
-
-      if (
-        this.pieces[pos] &&
-        this.pieces[pos].color !== this.pieces[prevPos].color &&
-        Math.abs(this.prevX - this.x) == 1 &&
-        Math.abs(this.prevY - this.y) == 1
-      ) {
-        return true;
-      }
-
-      //below condition helps to valid move for pawn
-
-      if (!this.pieces[pos] && Math.abs(this.prevY - this.y) === 0) return true;
+      return true;
     }
+
+    //below condition helps to valid move for pawn
+
+    if (!this.pieces[pos] && Math.abs(this.prevY - this.y) === 0) return true;
 
     return false;
   }

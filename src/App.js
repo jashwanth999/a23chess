@@ -11,17 +11,10 @@ import WaitingScreen from "./screens/WaitingScreen";
 import LoginOrSignup from "./screens/LoginOrSignup";
 
 function App() {
-  const userId = localStorage.getItem("_id");
-
-  console.log(userId);
-
   return (
     <Router>
       <Routes>
-        <Route
-          path="/"
-          element={userId ? <Navigate to="/home" /> : <LoginOrSignup />}
-        />
+        <Route path="/" element={<LoginOrSignup />} />
         <Route path="/home" element={<Home />} />
         <Route path="/waiting" element={<WaitingScreen />} />
         <Route path="/room/:roomid" element={<ChessBoard />} />

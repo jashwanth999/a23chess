@@ -10,12 +10,8 @@ export default function WaitingScreen() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    socket.on("recieve_room_users", (data) => {
-      dispatch(addUsers(data));
-
-      navigate(`/room/${data[0].roomId}`);
-    });
-  }, [dispatch]);
+    // navigate(`/room/${data[0].roomId}`);
+  }, []);
 
   return (
     <div style={rootDiv}>
