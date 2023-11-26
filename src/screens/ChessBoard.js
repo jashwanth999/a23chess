@@ -150,7 +150,7 @@ export default function ChessBoard() {
       {
         id: 1,
         title: "Blink Card",
-        text: "Move one of your pieces to any unoccupied square.players cannot move a piece to a square that is already occupied by another piece.",
+        text: "Move one of your pieces to any unoccupied square.players cannot move a piece to a square that is already occupied by another piece.Pieces follows same rules are standard chess",
         image: "https://www.chess.com/bundles/web/images/variants/4pc.svg",
       },
       {
