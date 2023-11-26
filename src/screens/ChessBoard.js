@@ -34,7 +34,7 @@ import CheckMatePopUp from "../components/CheckMatePopUp";
 import DetailsComponent from "../components/DetailsComponent";
 import axios from "axios";
 import { ArrowBack, ChevronLeft } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
+import { Button, IconButton, Paper, Typography } from "@mui/material";
 
 export default function ChessBoard() {
   const { roomid } = useParams();
@@ -145,20 +145,106 @@ export default function ChessBoard() {
     window.location.reload();
   };
 
-  const [cards, setCards] = useState([
-    {
-      id: 1,
-      text: "Move one piece three times in a turn, but it cannot capture on the third move",
-    },
-    {
-      id: 2,
-      text: "Place an obstacle on an empty square; pieces cannot move through it for one turn.",
-    },
-    {
-      id: 3,
-      text: "Swap the positions of one of your pieces with one of your opponent's.",
-    },
-  ]);
+  const [cards, setCards] = useState(
+    [
+      {
+        id: 1,
+        title: "Blink Card",
+        text: "Move one of your pieces to any unoccupied square.players cannot move a piece to a square that is already occupied by another piece.",
+        image: "https://www.chess.com/bundles/web/images/variants/4pc.svg",
+      },
+      {
+        id: 2,
+        title: "Mirror Image",
+        text: "Copy the movement of an opponent's piece for one turn",
+        image:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbgw5ILyoTVJfWWt9I9_2PXGHdy0F1WvyCJw&usqp=CAU",
+      },
+      {
+        id: 3,
+        title: "Swaparoo",
+        text: "Switch the positions of two of your pieces",
+        image:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjSgS24Tk_UAhCuZqdXAH3H1o5zTODiGysLJ1d8HIhMD4AqBu2TMk9f1aA-kbU-s7CK2E&usqp=CAU",
+      },
+
+      {
+        id: 4,
+        title: "Pawn Promotion",
+        text: "Promote a pawn to any piece of your choice.",
+        image:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXx6OHihTgrloibMAarzjzjnTYh74CQsh0cQ&usqp=CAU",
+      },
+
+      {
+        id: 5,
+        title: "Enchant Card",
+        text: "The Enchant card imbues a selected piece with temporary enhanced abilities or attributes for a specified duration.",
+        image:
+          "https://www.chess.com/bundles/web/images/variants/setup_chess.svg",
+      },
+
+      {
+        id: 6,
+        title: "Double Trouble",
+        text: "Move one piece twice in a turn, but you won’t be able to capture the opponent's piece after your second turn. Please note that it follows traditional chess rules.",
+        image:
+          "https://i.etsystatic.com/38033202/r/il/d76423/4339197639/il_1588xN.4339197639_n2e6.jpg",
+      },
+
+      {
+        id: 7,
+        title: "Ferocity Fusion",
+        text: "It is similar to the Triple Thread card but it can capture the opponent’s piece on the third move",
+        image:
+          "https://www.shutterstock.com/image-photo/knight-capturing-rook-chess-game-260nw-200041058.jpg",
+      },
+
+      {
+        id: 8,
+        title: "Fog of war",
+        text: "Opponent cannot see your moves for one turn",
+        image:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYViBjTtgkanViXkw4FCyppnqTEDhhSaRyZQ&usqp=CAU",
+      },
+      {
+        id: 9,
+        title: "Freeze",
+        text: "Opponent won’t be able to move any of his pieces for a turn.",
+        image:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRh5XquckO2u6-mlHgFEswgykSqWe7XL-ELvA&usqp=CAU",
+      },
+
+      {
+        id: 10,
+        title: "Revival",
+        text: "Bring one captured piece back onto the board.",
+        image:
+          "https://i.pinimg.com/474x/9c/18/8f/9c188f4d3b0861217b40ba0a13d6adb3.jpg",
+      },
+    ].reverse()
+  );
+
+  function getWindowDimensions() {
+    const { innerWidth: width, innerHeight: height } = window;
+    return {
+      width,
+      height,
+    };
+  }
+
+  const [windowDimensions, setWindowDimensions] = useState(
+    getWindowDimensions()
+  );
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowDimensions(getWindowDimensions());
+    }
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div style={rootDiv}>
@@ -294,32 +380,53 @@ export default function ChessBoard() {
           alignItems: "center",
         }}
       >
-        <button
-          onClick={() => {
-            setCards((cards) => cards.slice(0, -1));
-          }}
-          style={{ width: 100 }}
-        >
-          Pick Card
-        </button>
+        {cards.length > 0 && (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => {
+              setCards((cards) => cards.slice(0, -1));
+            }}
+            style={{ position: "relative", top: 20 }}
+          >
+            Pick Card
+          </Button>
+        )}
         <div style={rightDiv}>
           {cards.map((card, index) => {
             return (
-              <div
+              <Paper
+                elevation={1}
                 key={card.id}
                 style={{
-                  height: 300,
-                  width: 200,
-                  backgroundColor: "white",
-                  borderRadius: 10,
+                  height: 350,
+                  width: 250,
                   position: "absolute",
                   display: "flex",
-                  justifyContent: "center",
                   alignItems: "center",
+                  flexDirection: "column",
+                  marginRight: index * 8,
+                  marginBottom: index * 6,
+                  justifyContent: "space-around",
                 }}
               >
-                <p style={{ textAlign: "center" }}> {card.text} </p>
-              </div>
+                <h2 style={{ color: "#3498DB" }}> {card.title}</h2>
+                <img
+                  style={{ objectFit: "contain", height: 150, width: 150 }}
+                  src={card.image}
+                />
+                <Typography
+                  style={{
+                    textAlign: "center",
+                    margin: 10,
+                    fontWeight: "bold",
+                    fontSize: 14,
+                    color: "#EABF69",
+                  }}
+                >
+                  <q>{card.text}</q>
+                </Typography>
+              </Paper>
             );
           })}
         </div>
@@ -359,7 +466,8 @@ const topAndBottomDiv = {
 };
 
 const rightDiv = {
-  margin: 10,
+  marginTop: 20,
+  marginLeft: 20,
   display: "flex",
   height: gridConstants.gridSize,
   width: gridConstants.gridSize,
